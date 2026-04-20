@@ -1,113 +1,144 @@
-# Scalable Anomaly Detection in Urban Transportation Data Using Apache Spark
+# BDA Urban Transportation Anomaly Detection
 
 ## Overview
-This project focuses on detecting anomalous passenger demand patterns in large-scale urban transportation data using Apache Spark.  
-The dataset consists of hourly public transportation records from Istanbul Metropolitan Municipality (IMM) for the year 2020.
+This project investigates anomalous passenger demand patterns in large-scale urban transportation data using Apache Spark.
 
-The main objective is to build a scalable data processing pipeline and apply statistical anomaly detection methods to identify unusual patterns in passenger behavior.
+The dataset consists of hourly public transportation records from the Istanbul Metropolitan Municipality (IMM) Open Data Portal for the year 2020. The main goal is to build a scalable data processing pipeline and detect unusual passenger behavior through statistical anomaly detection.
+
+At the current stage of the project, the baseline anomaly detection method is **Z-score**. A machine learning-based extension using **Isolation Forest** is planned for the final phase.
 
 ---
 
-## Project Structure
+## Repository Structure
+
+```text
 .
 ├── src/
-│ ├── spark_preprocessing.py
-│ └── spark_zscore.py
+│   ├── dataset_summary.py
+│   ├── evaluation_metrics.py
+│   ├── merge_cloud_results.py
+│   ├── spark_preprocessing.py
+│   ├── spark_zscore.py
+│   └── visualize_cloud_zscore.py
 ├── requirements.txt
 ├── .gitignore
 └── README.md
 
+Project Pipeline
 
----
+Raw Data → Spark Preprocessing → Hourly Aggregation → Z-score Detection → Merged Results → Evaluation & Visualization
 
-## Methodology
+Methodology
 
-The project follows a structured data pipeline:
+The project follows the steps below:
 
-1. **Data Ingestion**
-   - Monthly CSV files are loaded into Apache Spark
+Data Ingestion
+Monthly CSV files are loaded from cloud storage.
+Preprocessing
+Data cleaning
+Type conversion
+Construction of a unified datetime field
+Removal of invalid or incomplete records
+Hourly Aggregation
+Data is aggregated based on:
+datetime
+line
+line_name
+town
+Feature Engineering
+Temporal features are extracted, including:
+hour
+month
+day of week
+weekend indicator
+Baseline Anomaly Detection
+Group-wise Z-scores are computed on total_passengers
+Grouping context:
+line
+hour
+day of week
+Observations with |Z| > 3 are labeled as anomalies
+Post-processing and Analysis
+Cloud result files are merged
+Dataset summary tables are generated
+Evaluation metrics and visualizations are produced
+Source Files
+spark_preprocessing.py
 
-2. **Preprocessing**
-   - Data cleaning
-   - Type conversion
-   - Construction of unified datetime field
+Runs the distributed preprocessing and aggregation pipeline on Apache Spark. It reads raw CSV files, cleans the data, constructs the datetime field, aggregates hourly observations, and extracts temporal features.
 
-3. **Aggregation**
-   - Hourly aggregation based on:
-     - datetime
-     - line
-     - line_name
-     - town
+spark_zscore.py
 
-4. **Feature Engineering**
-   - hour
-   - month
-   - day of week
-   - weekend indicator
+Runs the baseline Z-score anomaly detection pipeline in Spark using grouped statistics.
 
-5. **Anomaly Detection (Baseline)**
-   - Z-score is computed on `total_passengers`
-   - Grouped by (line, hour, day of week)
-   - Observations with |Z| > 3 are labeled as anomalies
+merge_cloud_results.py
 
----
+Merges distributed Spark CSV result files into a single consolidated result file for downstream analysis.
 
-## Technologies Used
+dataset_summary.py
 
-- Python
-- PySpark
-- Apache Spark
-- Google Cloud Dataproc
-- Google Cloud Storage
+Generates the dataset summary table used in the report, including total rows, total columns, anomaly count, and anomaly ratio.
 
----
+evaluation_metrics.py
 
-## Results (Midterm Stage)
+Computes quantitative evaluation outputs such as:
 
-- Total processed observations: ~6 million
-- Detected anomalies: ~69,000
-- Anomaly ratio: ~1.14%
-- Strong temporal patterns observed (peak hours)
-- Anomalies concentrated in specific months and transportation lines
+monthly anomaly distribution
+threshold sensitivity
+top transportation lines by anomaly rate
+visualize_cloud_zscore.py
 
----
+Generates visualizations from merged cloud results, including:
 
-## Example Anomaly
+average passenger count by hour
+passenger flow with anomalies for a selected line
+top anomaly-prone lines
+Technologies Used
+Python
+PySpark
+Apache Spark
+Google Cloud Dataproc
+Google Cloud Storage
+Pandas
+Matplotlib
+Current Results
 
-An example anomaly detected in the dataset:
+At the midterm stage:
 
-- Line: YENIKAPI - HACIOSMAN  
-- Time: 2020-01-01 00:00  
-- Observed passengers: 6215  
-- Expected (mean): ~822  
-- Z-score: 3.01 → labeled as anomaly  
+Total processed observations: approximately 6 million
+Total detected anomalies: approximately 69 thousand
+Overall anomaly ratio: approximately 1.14%
+Strong temporal demand patterns are visible across hours
+Anomalies are concentrated in specific months and transportation lines
+Example Anomaly
 
-This demonstrates how the model detects unusually high passenger demand relative to expected behavior.
+An example anomaly identified by the baseline Z-score method:
 
----
+Line: YENIKAPI - HACIOSMAN
+Datetime: 2020-01-01 00:00:00
+Observed passenger count: 6215
+Expected group mean: approximately 822.5
+Standard deviation: approximately 1789.3
+Z-score: 3.01
 
-## Current Status
+This example shows how the method captures unusually high passenger demand relative to comparable temporal groups.
 
-✔ Data preprocessing pipeline completed  
-✔ Hourly aggregation implemented  
-✔ Z-score anomaly detection working  
-✔ Preliminary analysis and visualizations completed  
+Current Status
+Completed Spark-based preprocessing
+Completed hourly aggregation
+Completed Z-score anomaly detection
+Generated preliminary quantitative results
+Generated visual summaries and anomaly analysis
+Prepared midterm report findings
+Future Work
 
----
+The next stage of the project will focus on:
 
-## Future Work
-
-- Implement Isolation Forest for anomaly detection
-- Compare statistical vs machine learning methods
-- Improve anomaly interpretation
-- Optimize pipeline performance
-
----
-
-## Notes
-
-- Large raw datasets are not included in this repository.
-- The project is designed to run on a distributed cloud environment.
-- This repository represents the midterm stage of the project.
-
----
+implementing Isolation Forest
+comparing statistical and machine learning-based methods
+improving anomaly interpretation
+expanding evaluation and characterization of results
+Notes
+Large raw datasets are not included in this repository.
+Generated outputs and temporary cloud result files are excluded to keep the repository lightweight.
+This repository contains the code base used for the course project and will continue to be extended in the final phase.
