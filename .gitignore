@@ -1,0 +1,38 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Large data files
+*.csv
+*.parquet
+*.json
+*.zip
+
+# Local outputs
+outputs/
+results/
+processed/
+raw/
+data/
+
+# Spark / temp
+spark-warehouse/
+*.log
+
+# Reports / course files
+midterm report*.pdf
+01-intro*.pdf
+BDA_syllabus*.pdf
+Project_proposal*.pdf
