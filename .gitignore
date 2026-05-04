@@ -14,11 +14,40 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
+
 # Large data files
-*.csv
 *.parquet
 *.json
 *.zip
+
+# Ignore CSV files by default
+*.csv
+
+# Ignore generated outputs by default
+outputs/*
+
+# Keep selected final evaluation outputs for dashboard/report
+!outputs/evaluation/
+outputs/evaluation/*
+
+# Z-score baseline outputs
+!outputs/evaluation/anomaly_distribution_by_month.csv
+!outputs/evaluation/anomaly_distribution_by_month.png
+!outputs/evaluation/threshold_sensitivity.csv
+!outputs/evaluation/threshold_sensitivity.png
+!outputs/evaluation/top5_line_anomaly_rate.csv
+!outputs/evaluation/top5_line_anomaly_rate.png
+
+# Final Isolation Forest V3 outputs
+!outputs/evaluation/isolation_forest_v3_summary.csv
+!outputs/evaluation/monthly_method_comparison_v3.csv
+!outputs/evaluation/line_method_comparison_v3.csv
+
+# Large/local data folders
+data/
+raw/
+processed/
+results/
 
 # Local outputs
 outputs/
