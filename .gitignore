@@ -38,10 +38,6 @@ outputs/evaluation/*
 !outputs/evaluation/top5_line_anomaly_rate.csv
 !outputs/evaluation/top5_line_anomaly_rate.png
 
-# Final Isolation Forest V3 outputs
-!outputs/evaluation/isolation_forest_v3_summary.csv
-!outputs/evaluation/monthly_method_comparison_v3.csv
-!outputs/evaluation/line_method_comparison_v3.csv
 
 # Large/local data folders
 data/
@@ -65,3 +61,20 @@ midterm report*.pdf
 01-intro*.pdf
 BDA_syllabus*.pdf
 Project_proposal*.pdf
+
+# Keep selected final evaluation outputs
+!outputs/
+!outputs/evaluation/
+
+!outputs/evaluation/anomaly_distribution_by_month.csv
+!outputs/evaluation/anomaly_distribution_by_month.png
+
+!outputs/evaluation/threshold_sensitivity.csv
+!outputs/evaluation/threshold_sensitivity.png
+
+!outputs/evaluation/top5_line_anomaly_rate.csv
+!outputs/evaluation/top5_line_anomaly_rate.png
+
+!outputs/evaluation/isolation_forest_summary.csv
+!outputs/evaluation/monthly_method_comparison.csv
+!outputs/evaluation/line_method_comparison.csv
