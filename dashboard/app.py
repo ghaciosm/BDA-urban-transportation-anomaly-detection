@@ -21,9 +21,9 @@ st.set_page_config(
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 EVAL_DIR = PROJECT_ROOT / "outputs" / "evaluation"
 
-SUMMARY_PATH = EVAL_DIR / "isolation_forest_v5_summary.csv"
-MONTHLY_PATH = EVAL_DIR / "monthly_method_comparison_v5.csv"
-LINE_PATH = EVAL_DIR / "line_method_comparison_v5.csv"
+SUMMARY_PATH = EVAL_DIR / "isolation_forest_summary.csv"
+MONTHLY_PATH = EVAL_DIR / "monthly_method_comparison.csv"
+LINE_PATH = EVAL_DIR / "line_method_comparison.csv"
 
 
 # -----------------------------
@@ -79,12 +79,12 @@ summary = summary_df.iloc[0]
 
 total_rows = summary["total_rows"]
 zscore_count = summary["zscore_anomaly_count"]
-iforest_count = summary["iforest_v5_anomaly_count"]
+iforest_count = summary["iforest_anomaly_count"]
 both_count = summary["both_methods_anomaly_count"]
 only_zscore = summary["only_zscore_anomaly_count"]
-only_iforest = summary["only_iforest_v5_anomaly_count"]
+only_iforest = summary["only_iforest_anomaly_count"]
 zscore_rate = summary["zscore_anomaly_rate"]
-iforest_rate = summary["iforest_v5_anomaly_rate"]
+iforest_rate = summary["iforest_anomaly_rate"]
 overlap_rate = summary["method_overlap_rate"]
 
 
@@ -128,7 +128,7 @@ st.sidebar.markdown(
     **Z-score**  
     Contextual statistical baseline.
 
-    **Independent Contextual Isolation Forest**  
+    **Contextual Isolation Forest**  
     Multivariate anomaly detection extension.
     """
 )
@@ -158,7 +158,7 @@ with tab_overview:
 
     col1.metric("Total Observations", format_int(total_rows))
     col2.metric("Z-score Anomalies", format_int(zscore_count), format_percent(zscore_rate))
-    col3.metric("Independent Contextual Isolation Forest Anomalies", format_int(iforest_count), format_percent(iforest_rate))
+    col3.metric("Contextual Isolation Forest Anomalies", format_int(iforest_count), format_percent(iforest_rate))
     col4.metric("Common Anomalies", format_int(both_count), format_percent(overlap_rate))
 
     st.subheader("Problem Definition")
@@ -180,7 +180,7 @@ with tab_overview:
     st.subheader("Pipeline")
     st.markdown(
         """
-        **Raw Data → Spark Preprocessing → Hourly Aggregation → Feature Engineering → Z-score → Independent Contextual Isolation Forest → Evaluation**
+        **Raw Data → Spark Preprocessing → Hourly Aggregation → Feature Engineering → Z-score → Contextual Isolation Forest → Evaluation**
         """
     )
 
@@ -199,7 +199,7 @@ with tab_overview:
                 "Google Cloud Storage bucket",
                 "Apache Spark on Google Cloud Dataproc",
                 "Contextual Z-score anomaly detection",
-                "Independent Contextual Isolation Forest with refined features",
+                "Contextual Isolation Forest with refined features",
                 "Summary tables, monthly analysis, line-based analysis, dashboard",
             ],
         }
@@ -212,11 +212,11 @@ with tab_overview:
 # Method Comparison
 # -----------------------------
 with tab_comparison:
-    st.header("Z-score vs Independent Contextual Isolation Forest")
+    st.header("Z-score vs Contextual Isolation Forest")
 
     comparison_df = pd.DataFrame(
         {
-            "Method": ["Z-score", "Independent Contextual Isolation Forest"],
+            "Method": ["Z-score", "Contextual Isolation Forest"],
             "Anomaly Count": [zscore_count, iforest_count],
             "Anomaly Rate": [zscore_rate, iforest_rate],
         }
@@ -260,7 +260,7 @@ with tab_comparison:
             "Category": [
                 "Detected by Both",
                 "Only Z-score",
-                "Only Independent Contextual Isolation Forest",
+                "Only Contextual Isolation Forest",
             ],
             "Count": [
                 both_count,
@@ -293,11 +293,11 @@ with tab_comparison:
 
         st.markdown(
             """
-            The overlap is relatively low, which indicates that the two methods capture
+            The overlap shows that the two methods agree on a substantial subset of anomalies while also capturing
             **different anomaly perspectives**.
 
             - **Z-score** focuses on contextual passenger-count deviation.
-            - **Independent Contextual Isolation Forest** captures multivariate irregular patterns.
+            - **Contextual Isolation Forest** captures residual and ratio-based irregular patterns.
             """
         )
 
@@ -313,7 +313,7 @@ with tab_monthly:
 
     monthly_long = monthly_plot_df.melt(
         id_vars=["month"],
-        value_vars=["zscore_anomaly_count", "iforest_v5_anomaly_count"],
+        value_vars=["zscore_anomaly_count", "iforest_anomaly_count"],
         var_name="Method",
         value_name="Anomaly Count",
     )
@@ -321,7 +321,7 @@ with tab_monthly:
     monthly_long["Method"] = monthly_long["Method"].replace(
         {
             "zscore_anomaly_count": "Z-score",
-            "iforest_v5_anomaly_count": "Independent Contextual Isolation Forest",
+            "iforest_anomaly_count": "Contextual Isolation Forest",
         }
     )
 
@@ -331,14 +331,14 @@ with tab_monthly:
         y="Anomaly Count",
         color="Method",
         markers=True,
-        title="Monthly Anomaly Count: Z-score vs Independent Contextual Isolation Forest",
+        title="Monthly Anomaly Count: Z-score vs Contextual Isolation Forest",
     )
     fig.update_layout(xaxis_title="Month", yaxis_title="Anomaly Count")
     st.plotly_chart(fig, use_container_width=True)
 
     monthly_rate_long = monthly_plot_df.melt(
         id_vars=["month"],
-        value_vars=["zscore_anomaly_rate", "iforest_v5_anomaly_rate"],
+        value_vars=["zscore_anomaly_rate", "iforest_anomaly_rate"],
         var_name="Method",
         value_name="Anomaly Rate",
     )
@@ -346,7 +346,7 @@ with tab_monthly:
     monthly_rate_long["Method"] = monthly_rate_long["Method"].replace(
         {
             "zscore_anomaly_rate": "Z-score",
-            "iforest_v5_anomaly_rate": "Independent Contextual Isolation Forest",
+            "iforest_anomaly_rate": "Contextual Isolation Forest",
         }
     )
 
@@ -364,7 +364,7 @@ with tab_monthly:
     st.subheader("Monthly Result Table")
     display_monthly = monthly_plot_df.copy()
     display_monthly["zscore_anomaly_rate"] = display_monthly["zscore_anomaly_rate"].map(lambda x: f"{x * 100:.2f}%")
-    display_monthly["iforest_v5_anomaly_rate"] = display_monthly["iforest_v5_anomaly_rate"].map(lambda x: f"{x * 100:.2f}%")
+    display_monthly["iforest_anomaly_rate"] = display_monthly["iforest_anomaly_rate"].map(lambda x: f"{x * 100:.2f}%")
     st.dataframe(display_monthly, use_container_width=True, hide_index=True)
 
 
@@ -380,7 +380,7 @@ with tab_lines:
         st.warning("No lines match the selected minimum observation threshold.")
     else:
         filtered_lines = filtered_lines.sort_values(
-            "iforest_v5_anomaly_rate",
+            "iforest_anomaly_rate",
             ascending=False,
         )
 
@@ -391,16 +391,16 @@ with tab_lines:
         )
 
         fig = px.bar(
-            top_lines.sort_values("iforest_v5_anomaly_rate"),
-            x="iforest_v5_anomaly_rate",
+            top_lines.sort_values("iforest_anomaly_rate"),
+            x="iforest_anomaly_rate",
             y="line",
             orientation="h",
-            title="Top Lines by Independent Contextual Isolation Forest Anomaly Rate",
-            text="iforest_v5_anomaly_rate",
+            title="Top Lines by Contextual Isolation Forest Anomaly Rate",
+            text="iforest_anomaly_rate",
         )
         fig.update_traces(texttemplate="%{text:.2%}", textposition="outside")
         fig.update_layout(
-            xaxis_title="Independent Contextual Isolation Forest Anomaly Rate",
+            xaxis_title="Contextual Isolation Forest Anomaly Rate",
             yaxis_title="Transportation Line",
         )
         st.plotly_chart(fig, use_container_width=True)
@@ -408,14 +408,14 @@ with tab_lines:
         fig = px.scatter(
             filtered_lines,
             x="zscore_anomaly_rate",
-            y="iforest_v5_anomaly_rate",
+            y="iforest_anomaly_rate",
             size="total_obs",
             hover_name="line",
             title="Line-Level Method Comparison",
         )
         fig.update_layout(
             xaxis_title="Z-score Anomaly Rate",
-            yaxis_title="Independent Contextual Isolation Forest Anomaly Rate",
+            yaxis_title="Contextual Isolation Forest Anomaly Rate",
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -423,10 +423,10 @@ with tab_lines:
 
         display_lines = top_lines.copy()
         display_lines["zscore_anomaly_rate"] = display_lines["zscore_anomaly_rate"].map(lambda x: f"{x * 100:.2f}%")
-        display_lines["iforest_v5_anomaly_rate"] = display_lines["iforest_v5_anomaly_rate"].map(lambda x: f"{x * 100:.2f}%")
+        display_lines["iforest_anomaly_rate"] = display_lines["iforest_anomaly_rate"].map(lambda x: f"{x * 100:.2f}%")
         display_lines["total_obs"] = display_lines["total_obs"].map(lambda x: f"{int(x):,}")
         display_lines["zscore_anomaly_count"] = display_lines["zscore_anomaly_count"].map(lambda x: f"{int(x):,}")
-        display_lines["iforest_v5_anomaly_count"] = display_lines["iforest_v5_anomaly_count"].map(lambda x: f"{int(x):,}")
+        display_lines["iforest_anomaly_count"] = display_lines["iforest_anomaly_count"].map(lambda x: f"{int(x):,}")
 
         st.dataframe(display_lines, use_container_width=True, hide_index=True)
 
@@ -449,34 +449,36 @@ with tab_interpretation:
         """
     )
 
-    st.subheader("2. What Independent Contextual Isolation Forest adds")
+    st.subheader("2. What Contextual Isolation Forest adds")
     st.markdown(
         """
-        Independent Contextual Isolation Forest provides a multivariate perspective. Instead of only
-        checking whether passenger count is far from the group mean, it considers
-        multiple features such as:
+        Contextual Isolation Forest evaluates passenger-demand behavior using
+        residual and ratio-based features derived from the same line-hour-day context.
 
-        - transformed passenger volume,
-        - transformed passage count,
-        - record count,
-        - temporal features,
-        - group mean and group standard deviation,
-        - relative deviation from expected behavior.
+        The final feature set focuses on:
 
-        Therefore, it can detect anomaly patterns that are not captured by Z-score alone.
+        - context-normalized residual,
+        - relative deviation from context mean,
+        - log observed/expected ratio,
+        - passage-per-passenger difference,
+        - passenger-per-record difference,
+        - and their absolute-value variants.
+
+        Therefore, it can detect observations whose demand behavior looks unusual
+        even when the raw passenger count is not the most extreme value in its context.
         """
     )
 
-    st.subheader("3. Why the overlap is low")
+    st.subheader("3. How to interpret the overlap")
     st.markdown(
         f"""
         The methods overlap on **{format_int(both_count)}** observations.
 
-        This relatively low overlap does not necessarily mean one method is wrong.
+        This moderate overlap does not necessarily mean one method is wrong.
         It means the methods detect different types of anomalies:
 
-        - Z-score detects extreme univariate deviations.
-        - Independent Contextual Isolation Forest detects unusual multivariate combinations.
+        - Z-score detects strong passenger-count deviations within each context.
+        - Contextual Isolation Forest detects unusual multivariate combinations.
         """
     )
 
@@ -494,7 +496,7 @@ with tab_interpretation:
     st.success(
         """
         Z-score is the most interpretable and reliable statistical baseline.
-        Independent Contextual Isolation Forest complements it by revealing additional multivariate
+        Contextual Isolation Forest complements it by revealing additional contextual
         anomaly patterns. Together, they provide a stronger analysis than either
         method alone.
         """
